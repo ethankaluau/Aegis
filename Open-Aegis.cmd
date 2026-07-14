@@ -5,6 +5,7 @@ cd /d "%~dp0"
 
 echo Getting today's market numbers...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-stocks.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-crypto.ps1"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-signals.ps1"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-data.ps1"
 echo.

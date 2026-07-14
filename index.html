@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Aegis</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L21 5V12C21 18 17 21 12 22C7 21 3 18 3 12V5Z' fill='%230f0f0f' stroke='%234a5560'/><text x='12' y='16' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold' font-size='12'>A</text></svg>">
 <style>
   :root{
     --bg:#0f1720; --card:#17212b; --ink:#eaf1f7; --muted:#9fb2c2;
@@ -21,6 +22,8 @@
   body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
   .wrap{max-width:940px;margin:0 auto;padding:24px 16px 90px}
   h1{font-size:28px;margin:0}
+  .brand{margin:0 0 4px;line-height:0}
+  .logo{height:104px;width:auto;display:block}
   .sub{color:var(--muted);margin:2px 0 18px;font-size:14px}
   h2{font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:30px 0 6px}
   .banner{background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-size:13px;margin:8px 0 16px}
@@ -39,6 +42,7 @@
   .st .price{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
   .st .chg{font-size:13px;font-variant-numeric:tabular-nums;text-align:right}
   .up{color:var(--up)} .down{color:var(--down)}
+  .pbadge{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:800;color:#fff;cursor:help}
   .st .mid{display:flex;align-items:center;gap:12px;margin:10px 0 4px}
   .spark{flex:1}
   .score{text-align:center;min-width:58px}
@@ -92,7 +96,12 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Aegis <span style="font-size:16px;opacity:.6">🛡️</span></h1>
+  <h1 class="brand">
+    <svg class="logo" viewBox="0 0 240 268" role="img" aria-label="Aegis">
+      <path d="M30 28 L210 28 L210 132 C210 198 170 238 120 258 C70 238 30 198 30 132 Z" fill="#0f0f0f" stroke="#4a5560" stroke-width="3"/>
+      <text x="120" y="120" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" font-size="46" letter-spacing="1">Aegis</text>
+    </svg>
+  </h1>
   <p class="sub" id="hello">Good morning. Your shield for honest investing. <span style="opacity:.8">Hover over any <span class="tip" data-tip="Like this! Any term with a dotted underline — or the signal badges, scores, and stat boxes — shows a plain-English explanation when you hover over it.">underlined term</span> for a plain-English explanation.</span></p>
 
   <h2>Buy / sell signals — backtested on 10 years</h2>
@@ -107,7 +116,8 @@
   <div class="banner">
     These are <b>individual stocks</b> — higher risk than funds, and any one can drop hard.
     The <b>Aegis Score</b> grades how well a stock fits calm, sensible investing (trend, momentum, stability, worst-drop).
-    <b>It does NOT predict the price will go up.</b> Tap a card to see the full reasoning.
+    The <b>price badge</b> (BUY / FAIR / PRICEY) reads whether it's a good price <i>right now</i> using RSI, its 52-week range, and Bollinger Bands — the gauges traders watch daily.
+    <b>Neither predicts the price will go up.</b> Tap a card to see the full reasoning.
     <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;font-size:12px">
       <span class="pill" style="background:var(--g4);color:#fff" data-tip="85–100 · Very steady: calm, trending up, resilient through past drops.">85+ Very steady</span>
       <span class="pill" style="background:var(--g3);color:#fff" data-tip="70–84 · Solid: generally healthy, with some bumps or one soft factor.">70–84 Solid</span>
@@ -121,6 +131,7 @@
       <label style="display:inline;font-size:13px;color:var(--muted)">Sort by </label>
       <select id="sort">
         <option value="score">Aegis Score</option>
+        <option value="cheap">Best price now</option>
         <option value="dayChg">Today's move</option>
         <option value="ret1y">1-year return</option>
         <option value="sym">Name (A–Z)</option>
@@ -129,6 +140,14 @@
     <span class="stamp" id="stStamp"></span>
   </div>
   <div class="stocks" id="stocks"></div>
+
+  <h2>Crypto — highest risk, watch closely</h2>
+  <div class="banner">
+    Crypto is <b>far more volatile and speculative than stocks</b> — a coin can lose most of its value fast, and unlike a company it has <b>no earnings, assets, or dividends</b> behind it. The same scores and price badges apply, but expect <b>very low steadiness scores</b> — that's honest, not a glitch.
+    <b>Only ever put in money you could afford to lose entirely.</b>
+  </div>
+  <div class="stamp" id="cryptoStamp" style="margin-bottom:8px"></div>
+  <div class="stocks" id="crypto"></div>
 
   <h2>Your steady foundation — funds</h2>
   <p class="sub" style="margin-top:0">Individual stocks are the exciting part; broad funds are the part that quietly builds wealth. Here's the honest growth math.</p>
@@ -173,6 +192,11 @@
       <div><b>Momentum (factor)</b><span>How much the price has climbed or fallen over the past year.</span></div>
       <div><b>Stability (factor)</b><span>How calm or wild the price swings are (its volatility). Calmer scores higher; a broad fund is about 15%/yr.</span></div>
       <div><b>Resilience (factor)</b><span>How deep its worst fall was this year. A shallower drop scores higher.</span></div>
+      <div><b>Price badge</b><span>Reads whether a stock is a good price <i>right now</i>: <b>BUY · Good price</b> (cheap / on sale), <b>FAIR price</b> (middling), <b>PRICEY · Getting pricey</b> (run up a bit), <b>PRICEY · Expensive</b> (run up a lot). Based on the trader gauges below.</span></div>
+      <div><b>RSI</b><span>Relative Strength Index (0–100). A speedometer for price. Under 30 = it's been beaten down and may be cheap; over 70 = it's run up fast and may be expensive. (Traders call these "oversold" and "overbought.")</span></div>
+      <div><b>52-week range</b><span>Where today's price sits between its lowest (0%) and highest (100%) of the past year. Near the low end is the cheaper end.</span></div>
+      <div><b>Bollinger Bands / %B</b><span>A stock's normal price range (its 20-day average, plus/minus its usual swing). %B under 0 = unusually cheap vs recent range; over 100 = unusually stretched.</span></div>
+      <div><b>Falling knife</b><span>A stock that's cheap <i>and still falling</i> in a downtrend. "Cheap" alone isn't a buy — a healthy stock on a dip is a far better entry than one in free-fall.</span></div>
       <div><b>Signal</b><span>The trend rule's current call: <b>BUY</b> (just rose above the line), <b>HOLD</b> (above it), <b>STAY OUT</b> (below it — wait in cash), <b>SELL</b> (just dropped below it).</span></div>
       <div><b>Backtest</b><span>Running a buy/sell rule over 10+ years of real history to see how it <i>actually</i> would have performed — evidence, not a guess.</span></div>
       <div><b>Buy &amp; hold</b><span>Buying once and never selling. The simple benchmark every strategy is measured against.</span></div>
@@ -194,6 +218,7 @@
 <script src="funds.js"></script>
 <script src="stocks.js"></script>
 <script src="signals.js"></script>
+<script src="crypto.js"></script>
 <script>
   const $ = id => document.getElementById(id);
   const money = n => "$" + Math.round(n).toLocaleString();
@@ -312,16 +337,60 @@
       <div class="track"><div class="fill" style="width:${val}%;background:${scoreColor(val)}"></div></div>
       <div class="facnote">${note}</div></div>`;
   }
+  const toneVar = {g4:'var(--g4)',g3:'var(--g3)',g2:'var(--g2)',g1:'var(--g1)'};
+  function priceRead(s){
+    if(s.rsi==null) return {word:'—',tone:'g3',label:'no read',up:s.vsAvg>=0};
+    const rsi=s.rsi, b=s.bollB, rp=s.rangePos, up=s.vsAvg>=0;
+    const veryCheap = rsi<=30 || b<=0  || rp<=8;
+    const cheap     = rsi<=42 || b<=20 || rp<=20;
+    const pricey    = rsi>=70 || b>=100|| rp>=95;
+    const hot       = rsi>=62 || rp>=85;
+    if(veryCheap) return {word:'BUY',   tone:'g4', label:'Great price',    up};
+    if(cheap)     return {word:'BUY',   tone:'g4', label:'Good price',     up};
+    if(pricey)    return {word:'PRICEY',tone:'g1', label:'Expensive',      up};
+    if(hot)       return {word:'PRICEY',tone:'g2', label:'Getting pricey', up};
+    return              {word:'FAIR',  tone:'g3', label:'Fair price',     up};
+  }
+  function dipNote(pr){
+    if(pr.word==='BUY') return pr.up
+      ? 'The uptrend is intact and it has pulled back — the kind of dip traders look to buy.'
+      : 'But it is BELOW its 200-day average (a downtrend). A cheap price can get cheaper — a “falling knife.” The best entries are dips in healthy uptrends, not downtrends.';
+    if(pr.word==='PRICEY') return 'It has run up a lot recently and looks expensive — patient buyers often wait for it to dip to a better price.';
+    return 'Neither a bargain nor stretched right now — a middling price.';
+  }
   function renderStocks(){
     const key=$("sort").value;
-    const arr=[...SD.stocks].sort((a,b)=> key==='sym' ? a.sym.localeCompare(b.sym) : b[key]-a[key]);
-    $("stocks").innerHTML = arr.map(s=>{
+    const cheapness = s => 100 - (((s.rsi??50) + (s.rangePos??50) + Math.min(100,Math.max(0,s.bollB??50)))/3);
+    const arr=[...SD.stocks].sort((a,b)=>
+      key==='sym'   ? a.sym.localeCompare(b.sym) :
+      key==='cheap' ? cheapness(b)-cheapness(a) :
+      b[key]-a[key]);
+    $("stocks").innerHTML = arr.map(marketCard).join("");
+    document.querySelectorAll("#stocks .st").forEach(el=>el.onclick=()=>el.classList.toggle("open"));
+    $("stStamp").textContent = "Updated " + SD.updated;
+  }
+  function renderCrypto(){
+    const C = window.AEGIS_CRYPTO;
+    if(!C || !C.coins || !C.coins.length){ return; }
+    $("crypto").innerHTML = C.coins.map(marketCard).join("");
+    document.querySelectorAll("#crypto .st").forEach(el=>el.onclick=()=>el.classList.toggle("open"));
+    $("cryptoStamp").textContent = "Updated " + C.updated;
+  }
+  function marketCard(s){
       const up=s.dayChg>=0;
+      const pr=priceRead(s);
+      const priceTip=`PRICE CHECK — is it a good price right now?\n\n`+
+        `RSI ${s.rsi} — under 30 means it's been beaten down (cheap), over 70 means it's run up a lot (expensive)\n`+
+        `${s.fromHigh}% from its 52-week high\n`+
+        `${s.rangePos}% up its 52-week range (0 = year low, 100 = year high)\n`+
+        `Bollinger ${s.bollB}% — under 0 is below its normal range, over 100 is above\n\n`+
+        `${dipNote(pr)}\n\nA good price is not a guarantee — it flags historically attractive levels, not certainties.`;
       return `<div class="st" data-sym="${s.sym}">
         <div class="top">
           <div><div class="sym">${s.sym}</div><div class="name">${s.name||''}</div></div>
-          <div><div class="price">$${s.price.toLocaleString()}</div>
-            <div class="chg ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(s.dayChg).toFixed(2)}% today</div></div>
+          <div style="text-align:right"><div class="price">$${s.price.toLocaleString()}</div>
+            <div class="chg ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(s.dayChg).toFixed(2)}% today</div>
+            <div class="pbadge" data-tip="${priceTip.replace(/"/g,'&quot;')}" style="background:${toneVar[pr.tone]}">${pr.word} · ${pr.label}</div></div>
         </div>
         <div class="mid">
           ${sparkline(s.spark)}
@@ -333,11 +402,18 @@
           ${facBar('Stability (how calm the ride)',s.sStab, `Swings about ${s.vol}% a year. Lower is calmer; a broad fund is ~15%.`)}
           ${facBar('Resilience (worst drop)',s.sDD, `Fell ${Math.abs(s.mdd)}% at its worst point this year. Could you hold through that?`)}
           <div class="facnote" style="margin-top:10px"><b>Aegis Score ${s.score}/100 — <span style="color:${scoreColor(s.score)}">${scoreBand(s.score).label}</span>.</b> ${scoreBand(s.score).desc}<br><br>It's the average of the four bars above — rewarding steadiness, not hype — and it is <b>not</b> a prediction the price will rise.</div>
+          <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+            <div style="font-weight:700;margin-bottom:8px">Price check — <span style="color:${toneVar[pr.tone]};font-weight:800">${pr.word} · ${pr.label}</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+              <div>${T('Relative Strength Index (0–100): the classic gauge of whether a stock is oversold (cheap) or overbought (pricey). Under 30 = oversold, over 70 = overbought.','RSI')}: <b>${s.rsi}</b></div>
+              <div>${T('How far below its highest price of the past year it is trading. A bigger drop means more “on sale” versus its recent peak.','From 52-wk high')}: <b>${s.fromHigh}%</b></div>
+              <div>${T('Where it sits between its 52-week low (0%) and 52-week high (100%). Lower = cheaper end of its yearly range.','In 52-wk range')}: <b>${s.rangePos}%</b></div>
+              <div>${T('Bollinger %B: where price sits within its normal recent range. Under 0 = below the usual band (unusually cheap), over 100 = above it (unusually stretched).','Bollinger %B')}: <b>${s.bollB}%</b></div>
+            </div>
+            <div class="facnote" style="margin-top:8px">${dipNote(pr)} <span class="warn">A good price isn't a guarantee — cheap can get cheaper.</span></div>
+          </div>
         </div>
       </div>`;
-    }).join("");
-    document.querySelectorAll(".st").forEach(el=>el.onclick=()=>el.classList.toggle("open"));
-    $("stStamp").textContent = "Updated " + SD.updated;
   }
 
   /* ---------- FUNDS + PROJECTION ---------- */
@@ -377,7 +453,7 @@
   ["start","monthly","years"].forEach(id=>$(id).addEventListener("input",draw));
   $("sort").addEventListener("change",renderStocks);
   $("stampFunds").textContent=" Funds updated "+FUNDS.updated+".";
-  renderSignals(); renderStocks(); renderFunds(); draw();
+  renderSignals(); renderStocks(); renderCrypto(); renderFunds(); draw();
 </script>
 </body>
 </html>
