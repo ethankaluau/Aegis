@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 echo ============================================
-echo   Backing up Steady to GitHub...
+echo   Backing up Aegis to GitHub...
 echo ============================================
 echo.
 git add -A

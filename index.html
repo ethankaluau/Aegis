@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Steady</title>
+<title>Aegis</title>
 <style>
   :root{
     --bg:#0f1720; --card:#17212b; --ink:#eaf1f7; --muted:#9fb2c2;
@@ -92,8 +92,8 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Steady</h1>
-  <p class="sub" id="hello">Good morning. Your market, watched honestly. <span style="opacity:.8">Hover over any <span class="tip" data-tip="Like this! Any term with a dotted underline — or the signal badges, scores, and stat boxes — shows a plain-English explanation when you hover over it.">underlined term</span> for a plain-English explanation.</span></p>
+  <h1>Aegis <span style="font-size:16px;opacity:.6">🛡️</span></h1>
+  <p class="sub" id="hello">Good morning. Your shield for honest investing. <span style="opacity:.8">Hover over any <span class="tip" data-tip="Like this! Any term with a dotted underline — or the signal badges, scores, and stat boxes — shows a plain-English explanation when you hover over it.">underlined term</span> for a plain-English explanation.</span></p>
 
   <h2>Buy / sell signals — backtested on 10 years</h2>
   <div class="banner">
@@ -106,7 +106,7 @@
   <h2>The market today</h2>
   <div class="banner">
     These are <b>individual stocks</b> — higher risk than funds, and any one can drop hard.
-    The <b>Steady Score</b> grades how well a stock fits calm, sensible investing (trend, momentum, stability, worst-drop).
+    The <b>Aegis Score</b> grades how well a stock fits calm, sensible investing (trend, momentum, stability, worst-drop).
     <b>It does NOT predict the price will go up.</b> Tap a card to see the full reasoning.
     <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;font-size:12px">
       <span class="pill" style="background:var(--g4);color:#fff" data-tip="85–100 · Very steady: calm, trending up, resilient through past drops.">85+ Very steady</span>
@@ -120,7 +120,7 @@
     <div>
       <label style="display:inline;font-size:13px;color:var(--muted)">Sort by </label>
       <select id="sort">
-        <option value="score">Steady Score</option>
+        <option value="score">Aegis Score</option>
         <option value="dayChg">Today's move</option>
         <option value="ret1y">1-year return</option>
         <option value="sym">Name (A–Z)</option>
@@ -167,7 +167,7 @@
       <div><b>vs 200-day avg</b><span>How far today's price sits above or below that line, as a percentage.</span></div>
       <div><b>Extended run</b><span>Price is more than ~15% <i>above</i> its 200-day average — it has risen far and fast. Can mean real strength, or that it's stretched and due for a rest.</span></div>
       <div><b>Deep downtrend</b><span>Price is more than ~15% <i>below</i> its 200-day average — a sustained fall.</span></div>
-      <div><b>Steady Score</b><span>A 0–100 grade averaging four factors below. It rewards calm, steady stocks over hype — and is <b>not</b> a prediction the price will rise.</span></div>
+      <div><b>Aegis Score</b><span>A 0–100 grade averaging four factors below. It rewards calm, steady stocks over hype — and is <b>not</b> a prediction the price will rise.</span></div>
       <div><b>Score bands</b><span>Very steady (85+), Solid (70–84), Mixed (55–69), Shaky (40–54), Rough (below 40).</span></div>
       <div><b>Trend (factor)</b><span>Is the price above its long-run average — i.e. generally rising?</span></div>
       <div><b>Momentum (factor)</b><span>How much the price has climbed or fallen over the past year.</span></div>
@@ -325,14 +325,14 @@
         </div>
         <div class="mid">
           ${sparkline(s.spark)}
-          <div class="score" data-tip="Steady Score ${s.score}/100 — ${scoreBand(s.score).label}.\n\n${scoreBand(s.score).desc}\n\nThe full scale:\n• 85–100  Very steady\n• 70–84  Solid\n• 55–69  Mixed\n• 40–54  Shaky\n• below 40  Rough\n\nIt averages four factors — trend, momentum, stability, worst-drop — and is NOT a prediction the price will go up."><div class="n" style="color:${scoreColor(s.score)}">${s.score}</div><div class="l" style="color:${scoreColor(s.score)}">${scoreBand(s.score).label}</div></div>
+          <div class="score" data-tip="Aegis Score ${s.score}/100 — ${scoreBand(s.score).label}.\n\n${scoreBand(s.score).desc}\n\nThe full scale:\n• 85–100  Very steady\n• 70–84  Solid\n• 55–69  Mixed\n• 40–54  Shaky\n• below 40  Rough\n\nIt averages four factors — trend, momentum, stability, worst-drop — and is NOT a prediction the price will go up."><div class="n" style="color:${scoreColor(s.score)}">${s.score}</div><div class="l" style="color:${scoreColor(s.score)}">${scoreBand(s.score).label}</div></div>
         </div>
         <div class="detail">
           ${facBar('Trend (above its long-run price?)',s.sTrend, s.vsAvg>=0?`Trading ${s.vsAvg}% above its 200-day average — generally rising.`:`Trading ${Math.abs(s.vsAvg)}% below its 200-day average — in a downtrend.`)}
           ${facBar('Momentum (last 12 months)',s.sMom, `${s.ret1y>=0?'Up':'Down'} ${Math.abs(s.ret1y)}% over the past year.`)}
           ${facBar('Stability (how calm the ride)',s.sStab, `Swings about ${s.vol}% a year. Lower is calmer; a broad fund is ~15%.`)}
           ${facBar('Resilience (worst drop)',s.sDD, `Fell ${Math.abs(s.mdd)}% at its worst point this year. Could you hold through that?`)}
-          <div class="facnote" style="margin-top:10px"><b>Steady Score ${s.score}/100 — <span style="color:${scoreColor(s.score)}">${scoreBand(s.score).label}</span>.</b> ${scoreBand(s.score).desc}<br><br>It's the average of the four bars above — rewarding steadiness, not hype — and it is <b>not</b> a prediction the price will rise.</div>
+          <div class="facnote" style="margin-top:10px"><b>Aegis Score ${s.score}/100 — <span style="color:${scoreColor(s.score)}">${scoreBand(s.score).label}</span>.</b> ${scoreBand(s.score).desc}<br><br>It's the average of the four bars above — rewarding steadiness, not hype — and it is <b>not</b> a prediction the price will rise.</div>
         </div>
       </div>`;
     }).join("");

@@ -1,4 +1,4 @@
-# Steady - fetches live stock data + computes transparent scorecards into stocks.js
+# Aegis - fetches live stock data + computes transparent scorecards into stocks.js
 # Reads tickers from watchlist.txt. No account or API key needed.
 
 function Get-Chart($sym,$range,$interval){

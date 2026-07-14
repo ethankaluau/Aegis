@@ -7,6 +7,6 @@ echo %TICKER%>>"%~dp0watchlist.txt"
 echo Added %TICKER% to your watchlist. Refreshing...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-stocks.ps1"
 echo.
-echo Done. Open Steady to see it.
+echo Done. Open Aegis to see it.
 pause
 endlocal

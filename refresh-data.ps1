@@ -1,4 +1,4 @@
-# Steady — refreshes real fund data into funds.js
+# Aegis — refreshes real fund data into funds.js
 # Pulls from Yahoo Finance. No account or API key needed.
 
 $funds = @(

@@ -1,4 +1,4 @@
-# Steady - backtests a transparent 200-day trend rule on 10yr history -> signals.js
+# Aegis - backtests a transparent 200-day trend rule on 10yr history -> signals.js
 # Rule: hold the stock while it's above its 200-day average; move to cash when below.
 # Every claim is measured on REAL history, not predicted.
 
