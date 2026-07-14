@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Steady</title>
+<style>
+  :root{
+    --bg:#0f1720; --card:#17212b; --ink:#eaf1f7; --muted:#9fb2c2;
+    --accent:#3fb98c; --accent-soft:#1f3b33; --line:#243441; --warn:#e0b341;
+    --band:#26506a; --up:#3fb98c; --down:#e08a8a;
+    --g1:#e0645a; --g2:#e0b341; --g3:#5bb3d0; --g4:#3fb98c;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f4f7fa; --card:#ffffff; --ink:#132029; --muted:#5a6b78;
+      --accent:#127a53; --accent-soft:#e3f2ea; --line:#e2e9ef; --warn:#8a6410;
+      --band:#cfe3f0; --up:#127a53; --down:#c0392b;
+      --g1:#c0392b; --g2:#a67c0a; --g3:#2b7a9e; --g4:#127a53;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:940px;margin:0 auto;padding:24px 16px 90px}
+  h1{font-size:28px;margin:0}
+  .sub{color:var(--muted);margin:2px 0 18px;font-size:14px}
+  h2{font-size:14px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:30px 0 6px}
+  .banner{background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-size:13px;margin:8px 0 16px}
+  .banner b{color:var(--warn)}
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:14px}
+  .stamp{color:var(--muted);font-size:12px}
+
+  .stocks{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.stocks{grid-template-columns:1fr}}
+  .st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;cursor:pointer;transition:.15s}
+  .st:hover{border-color:var(--muted)}
+  .st .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .st .sym{font-weight:800;font-size:18px}
+  .st .name{color:var(--muted);font-size:12px;margin-top:1px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .st .price{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+  .st .chg{font-size:13px;font-variant-numeric:tabular-nums;text-align:right}
+  .up{color:var(--up)} .down{color:var(--down)}
+  .st .mid{display:flex;align-items:center;gap:12px;margin:10px 0 4px}
+  .spark{flex:1}
+  .score{text-align:center;min-width:58px}
+  .score .n{font-size:24px;font-weight:800;line-height:1}
+  .score .l{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .detail{display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+  .st.open .detail{display:block}
+  .fac{margin:9px 0}
+  .fac .lab{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+  .track{height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+  .fill{height:100%;border-radius:4px}
+  .facnote{font-size:12px;color:var(--muted);margin-top:8px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:8px}
+  .funds{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:600px){.funds{grid-template-columns:1fr}}
+  .fund{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:.15s;position:relative}
+  .fund.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+  .fund .nm{font-weight:700}
+  .fund .ds{color:var(--muted);font-size:12px;margin:2px 0 10px;min-height:32px}
+  .fund .big{font-size:22px;font-weight:800;color:var(--accent)}
+  .fund .biglab{font-size:10px;color:var(--muted);text-transform:uppercase}
+  .pills{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .pill{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--accent-soft)}
+  .pill.risk{background:transparent;border:1px solid var(--down);color:var(--down)}
+  .field{margin-bottom:14px}
+  label{display:block;font-weight:600;margin-bottom:5px;font-size:14px}
+  input[type=range]{width:100%}
+  .val{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+  .out{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+  @media(max-width:560px){.out{grid-template-columns:1fr}}
+  .stat{background:var(--accent-soft);border-radius:12px;padding:12px}
+  .stat .n{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:10px;color:var(--muted);text-transform:uppercase}
+  .planbar{background:var(--accent-soft);border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px}
+  .note{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+  .warn{color:var(--warn);font-weight:600}
+  .foot{font-size:13px;color:var(--muted);margin-top:26px}
+  .gloss{display:grid;grid-template-columns:1fr;gap:12px}
+  .gloss>div{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start}
+  @media(max-width:560px){.gloss>div{grid-template-columns:1fr;gap:2px}}
+  .gloss b{color:var(--ink)} .gloss span{color:var(--muted)}
+  .tip{border-bottom:1px dashed var(--muted);cursor:help}
+  #tooltip{position:fixed;z-index:200;max-width:300px;background:var(--card);color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;
+    white-space:pre-line;box-shadow:0 10px 30px rgba(0,0,0,.35);pointer-events:none;opacity:0;transition:opacity .12s}
+  [data-tip]{cursor:help}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Steady</h1>
+  <p class="sub" id="hello">Good morning. Your market, watched honestly. <span style="opacity:.8">Hover over any <span class="tip" data-tip="Like this! Any term with a dotted underline — or the signal badges, scores, and stat boxes — shows a plain-English explanation when you hover over it.">underlined term</span> for a plain-English explanation.</span></p>
+
+  <h2>Buy / sell signals — backtested on 10 years</h2>
+  <div class="banner">
+    Signals come from a classic rule: <b>hold while the stock is above its 200-day average, step to cash when it drops below.</b>
+    Tap a card to see how that rule <b>actually performed vs. just buying and holding</b> — real history, not a prediction.
+    <b>Often, timing earns less than holding but softens the worst crashes.</b> That truth is the point.
+  </div>
+  <div class="stocks" id="signals"></div>
+
+  <h2>The market today</h2>
+  <div class="banner">
+    These are <b>individual stocks</b> — higher risk than funds, and any one can drop hard.
+    The <b>Steady Score</b> grades how well a stock fits calm, sensible investing (trend, momentum, stability, worst-drop).
+    <b>It does NOT predict the price will go up.</b> Tap a card to see the full reasoning.
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;font-size:12px">
+      <span class="pill" style="background:var(--g4);color:#fff" data-tip="85–100 · Very steady: calm, trending up, resilient through past drops.">85+ Very steady</span>
+      <span class="pill" style="background:var(--g3);color:#fff" data-tip="70–84 · Solid: generally healthy, with some bumps or one soft factor.">70–84 Solid</span>
+      <span class="pill" style="background:var(--g2);color:#fff" data-tip="55–69 · Mixed: real strengths and real weaknesses together.">55–69 Mixed</span>
+      <span class="pill" style="background:var(--g2);color:#fff" data-tip="40–54 · Shaky: struggling on several fronts; higher risk.">40–54 Shaky</span>
+      <span class="pill" style="background:var(--g1);color:#fff" data-tip="Below 40 · Rough: weak nearly across the board; treat with caution.">&lt;40 Rough</span>
+    </div>
+  </div>
+  <div class="bar">
+    <div>
+      <label style="display:inline;font-size:13px;color:var(--muted)">Sort by </label>
+      <select id="sort">
+        <option value="score">Steady Score</option>
+        <option value="dayChg">Today's move</option>
+        <option value="ret1y">1-year return</option>
+        <option value="sym">Name (A–Z)</option>
+      </select>
+    </div>
+    <span class="stamp" id="stStamp"></span>
+  </div>
+  <div class="stocks" id="stocks"></div>
+
+  <h2>Your steady foundation — funds</h2>
+  <p class="sub" style="margin-top:0">Individual stocks are the exciting part; broad funds are the part that quietly builds wealth. Here's the honest growth math.</p>
+  <div class="funds" id="funds"></div>
+
+  <h2 id="projTitle">See it grow over time</h2>
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label>Starting amount: <span class="val" id="startV">$500</span></label>
+        <input type="range" id="start" min="0" max="20000" step="100" value="500">
+      </div>
+      <div class="field">
+        <label>Added every month: <span class="val" id="monthlyV">$150</span></label>
+        <input type="range" id="monthly" min="0" max="2000" step="10" value="150">
+      </div>
+    </div>
+    <div class="field">
+      <label>Years invested: <span class="val" id="yearsV">25</span></label>
+      <input type="range" id="years" min="1" max="45" step="1" value="25">
+    </div>
+    <div class="out">
+      <div class="stat" data-tip="The total of your own money — your starting amount plus every monthly contribution added up over the years. This is what you actually deposited."><div class="n" id="youPut">$0</div><div class="l">You put in</div></div>
+      <div class="stat" data-tip="A cautious estimate of what it could grow to, using a conservative yearly return. Real results will bounce above and below this — it is not a guarantee."><div class="n" id="midOut">$0</div><div class="l">Likely value</div></div>
+      <div class="stat" data-tip="The difference between the likely value and what you put in — the money the market earned for you on top of your own deposits. This is compounding at work."><div class="n" id="growth">$0</div><div class="l">Growth on top</div></div>
+    </div>
+    <svg id="chart" viewBox="0 0 640 240" role="img" aria-label="Projected growth"></svg>
+    <div class="planbar" id="planbar"></div>
+    <p class="note" id="note"></p>
+  </div>
+
+  <h2>Glossary — what the words mean</h2>
+  <div class="card" style="font-size:14px">
+    <div class="gloss">
+      <div><b>200-day average</b><span>The average closing price over the last ~10 months. A standard line for "is this stock generally rising or falling?"</span></div>
+      <div><b>vs 200-day avg</b><span>How far today's price sits above or below that line, as a percentage.</span></div>
+      <div><b>Extended run</b><span>Price is more than ~15% <i>above</i> its 200-day average — it has risen far and fast. Can mean real strength, or that it's stretched and due for a rest.</span></div>
+      <div><b>Deep downtrend</b><span>Price is more than ~15% <i>below</i> its 200-day average — a sustained fall.</span></div>
+      <div><b>Steady Score</b><span>A 0–100 grade averaging four factors below. It rewards calm, steady stocks over hype — and is <b>not</b> a prediction the price will rise.</span></div>
+      <div><b>Score bands</b><span>Very steady (85+), Solid (70–84), Mixed (55–69), Shaky (40–54), Rough (below 40).</span></div>
+      <div><b>Trend (factor)</b><span>Is the price above its long-run average — i.e. generally rising?</span></div>
+      <div><b>Momentum (factor)</b><span>How much the price has climbed or fallen over the past year.</span></div>
+      <div><b>Stability (factor)</b><span>How calm or wild the price swings are (its volatility). Calmer scores higher; a broad fund is about 15%/yr.</span></div>
+      <div><b>Resilience (factor)</b><span>How deep its worst fall was this year. A shallower drop scores higher.</span></div>
+      <div><b>Signal</b><span>The trend rule's current call: <b>BUY</b> (just rose above the line), <b>HOLD</b> (above it), <b>STAY OUT</b> (below it — wait in cash), <b>SELL</b> (just dropped below it).</span></div>
+      <div><b>Backtest</b><span>Running a buy/sell rule over 10+ years of real history to see how it <i>actually</i> would have performed — evidence, not a guess.</span></div>
+      <div><b>Buy &amp; hold</b><span>Buying once and never selling. The simple benchmark every strategy is measured against.</span></div>
+      <div><b>Drawdown / worst drop</b><span>The biggest fall from a high point down to the next low. A gut-check on how much fear you'd have to sit through.</span></div>
+      <div><b>Win rate</b><span>The share of completed buy-then-sell trades that ended in a profit.</span></div>
+      <div><b>In market</b><span>The share of days a rule was actually invested, versus sitting safely in cash.</span></div>
+      <div><b>Fee (expense ratio)</b><span>A fund's yearly cost as a % of your money, charged automatically. Lower is better; over decades it adds up.</span></div>
+      <div><b>Compounding</b><span>Growth earning its own growth over time — the quiet engine behind long-term wealth.</span></div>
+    </div>
+  </div>
+
+  <p class="foot">
+    <span class="warn">Financial education, not advice, and never a guarantee.</span>
+    Built for one user — you, the risk holder. Past performance doesn't predict the future; individual stocks can lose money fast.
+    <span id="stampFunds"></span>
+  </p>
+</div>
+
+<script src="funds.js"></script>
+<script src="stocks.js"></script>
+<script src="signals.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const money = n => "$" + Math.round(n).toLocaleString();
+
+  /* ---------- HOVER TOOLTIPS (works on dynamic content via delegation) ---------- */
+  const tipEl = document.createElement('div'); tipEl.id='tooltip'; document.body.appendChild(tipEl);
+  let tipTarget=null;
+  function tipMove(e){
+    const pad=14, w=tipEl.offsetWidth, h=tipEl.offsetHeight;
+    let x=e.clientX+pad, y=e.clientY+pad;
+    if(x+w>window.innerWidth-8) x=e.clientX-w-pad;
+    if(y+h>window.innerHeight-8) y=e.clientY-h-pad;
+    tipEl.style.left=Math.max(8,x)+'px'; tipEl.style.top=Math.max(8,y)+'px';
+  }
+  document.addEventListener('mouseover', e=>{
+    const t=e.target.closest && e.target.closest('[data-tip]'); if(!t) return;
+    tipTarget=t; tipEl.textContent=t.getAttribute('data-tip'); tipEl.style.opacity='1'; tipMove(e);
+  });
+  document.addEventListener('mousemove', e=>{ if(tipTarget) tipMove(e); });
+  document.addEventListener('mouseout', e=>{
+    if(!tipTarget) return;
+    const to=e.relatedTarget; if(to && to.closest && to.closest('[data-tip]')===tipTarget) return;
+    tipEl.style.opacity='0'; tipTarget=null;
+  });
+  const T = (text, label, cls='tip') => `<span class="${cls}" data-tip="${text.replace(/"/g,'&quot;')}">${label}</span>`;
+  const FUNDS = window.STEADY_DATA || {updated:"(never)", funds:[]};
+  const SD = window.STEADY_STOCKS || {updated:"(never)", stocks:[]};
+  const SG = window.STEADY_SIGNALS || {updated:"(never)", signals:[]};
+  let selected = 0;
+
+  /* ---------- SIGNALS + BACKTEST ---------- */
+  const sigColor = {BUY:'var(--g4)', HOLD:'var(--g3)', AVOID:'var(--g2)', SELL:'var(--g1)'};
+  const sigWord  = {BUY:'BUY', HOLD:'HOLD', AVOID:'STAY OUT', SELL:'SELL'};
+  const sigTip = {
+    BUY:'The price just rose back above its 200-day average — the trend rule’s entry point. The rule would start holding here.',
+    HOLD:'The price is above its 200-day average (an uptrend). The rule says keep holding what you own.',
+    AVOID:'STAY OUT: the price is below its 200-day average (a downtrend). The rule says don’t own it right now — sit in cash and wait until it turns back up.',
+    SELL:'The price just dropped below its 200-day average — the trend rule’s exit point. The rule would move to cash here.'
+  };
+  function equityChart(strat, bh){
+    const all=[...strat,...bh], lo=Math.min(...all), hi=Math.max(...all), rng=(hi-lo)||1;
+    const w=300,h=90,pad=4, N=Math.max(strat.length,bh.length);
+    const x=i=>pad+i*(w-2*pad)/(N-1), y=v=>h-pad-(v-lo)/rng*(h-2*pad);
+    const P=a=>a.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+    return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto">
+      <path d="${P(bh)}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <path d="${P(strat)}" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>`;
+  }
+  function renderSignals(){
+    $("signals").innerHTML = SG.signals.map(s=>{
+      const beat = s.stratCAGR > s.bhCAGR;
+      const cushion = s.stratDD > s.bhDD;   // less-negative = better
+      const vsTip = `How far the price is above or below its 200-day average (a ~10-month average price).\n\nWhat the ranges mean:\n• within ±10% — normal\n• 10–15% above — moderately above trend\n• over 15% above — “extended run” (risen far, fast)\n• 10–15% below — moderately below trend\n• over 15% below — “deep downtrend”\n\nRight now: ${vsSMADesc(s.vsSMA)}.`;
+      return `<div class="st" data-sym="${s.sym}">
+        <div class="top">
+          <div>
+            <div class="sym">${s.sym}</div>
+            <div data-tip="${vsTip.replace(/"/g,'&quot;')}" style="font-size:27px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;color:${s.vsSMA>=0?'var(--up)':'var(--down)'}">${s.vsSMA>=0?'+':''}${s.vsSMA}%</div>
+            <div class="name" data-tip="${vsTip.replace(/"/g,'&quot;')}">vs 200-day average — ${vsSMADesc(s.vsSMA)}</div>
+          </div>
+          <div style="text-align:right">
+            <span data-tip="${sigTip[s.signal].replace(/"/g,'&quot;')}" style="display:inline-block;padding:4px 12px;border-radius:20px;font-weight:800;font-size:14px;color:#fff;background:${sigColor[s.signal]}">${sigWord[s.signal]}</span>
+          </div>
+        </div>
+        <div class="detail">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px">Timing rule (solid) vs buy &amp; hold (dashed), $1 over ${s.years} yrs</div>
+          ${equityChart(s.stratEq, s.bhEq)}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px">
+            <div>${T('How much the timing rule grew per year, on average, over the test period. Includes time sitting in cash.','Timing rule')}: <b>${s.stratCAGR}%/yr</b></div>
+            <div>${T('How much you would have made per year by simply buying once and never selling.','Buy & hold')}: <b>${s.bhCAGR}%/yr</b></div>
+            <div>${T('The worst peak-to-bottom fall the timing rule suffered. Smaller (less negative) is calmer.',"Rule's worst drop")}: <b>${s.stratDD}%</b></div>
+            <div>${T('The worst peak-to-bottom fall if you just held. This is the fear you’d have to sit through.',"Hold's worst drop")}: <b>${s.bhDD}%</b></div>
+            <div>${T('How many complete buy-then-sell round trips the rule made over the test period. More trades = more activity and cost.','Trades')}: <b>${s.trades}</b></div>
+            <div>${T('The share of those trades that ended in a profit. Trend rules often win less than half the time but let winners run.','Wins')}: <b>${s.winRate}%</b> · ${T('The share of days the rule was actually invested (vs sitting in cash). The rest of the time your money was on the sidelines.','in market')} <b>${s.timeIn}%</b></div>
+          </div>
+          <div class="facnote" style="margin-top:10px">
+            Over ${s.years} years the timing rule ${beat?'<b style="color:var(--up)">beat</b>':'<b style="color:var(--down)">trailed</b>'} buy-and-hold,
+            and ${cushion?'<b style="color:var(--up)">softened</b>':'<b>did not soften</b>'} the worst crash.
+            Signal <b>${sigWord[s.signal]}</b> = today the price is ${s.vsSMA>=0?'above':'below'} its 200-day average.
+            <span class="warn">This is the rule's past record, not a promise about the future.</span>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+    document.querySelectorAll("#signals .st").forEach(el=>el.onclick=()=>el.classList.toggle("open"));
+  }
+
+  /* ---------- STOCKS ---------- */
+  const scoreColor = s => s>=85?'var(--g4)':s>=70?'var(--g3)':s>=55?'var(--g2)':s>=40?'var(--g2)':'var(--g1)';
+  function scoreBand(s){
+    if(s>=85) return {label:'Very steady', desc:'Calm, trending up, and resilient through past drops — the steady, low-drama profile this app favors most.'};
+    if(s>=70) return {label:'Solid',       desc:'Generally healthy — a decent trend and returns, with some bumpiness or one soft factor. A reasonable, if imperfect, profile.'};
+    if(s>=55) return {label:'Mixed',       desc:'Real strengths and real weaknesses together — often bumpy, or lagging on trend or momentum. Look closely before leaning on it.'};
+    if(s>=40) return {label:'Shaky',       desc:'Struggling on several fronts — weak trend, big swings, or deep past drops. Higher risk; the numbers are flashing caution.'};
+    return               {label:'Rough',   desc:'Weak nearly across the board right now — likely in a downtrend and/or very volatile. Treat with real caution.'};
+  }
+  function vsSMADesc(v){
+    const a=Math.abs(v);
+    if(a<=5)  return 'right around its trend line — normal';
+    if(v>5  && v<=15) return 'moderately above trend';
+    if(v>15)          return 'well above trend — an extended run';
+    if(v<-5 && v>=-15) return 'moderately below trend';
+    return 'well below trend — a deep downtrend';
+  }
+  function sparkline(pts){
+    if(!pts||pts.length<2) return '';
+    const w=140,h=34,pad=2, lo=Math.min(...pts), hi=Math.max(...pts), rng=(hi-lo)||1;
+    const x=i=>pad+i*(w-2*pad)/(pts.length-1), y=v=>h-pad-(v-lo)/rng*(h-2*pad);
+    const d=pts.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+    const rising=pts[pts.length-1]>=pts[0];
+    return `<svg viewBox="0 0 ${w} ${h}" class="spark" preserveAspectRatio="none" style="height:34px">
+      <path d="${d}" fill="none" stroke="${rising?'var(--up)':'var(--down)'}" stroke-width="1.6"/></svg>`;
+  }
+  function facBar(label,val,note){
+    return `<div class="fac"><div class="lab"><span>${label}</span><span>${val}/100</span></div>
+      <div class="track"><div class="fill" style="width:${val}%;background:${scoreColor(val)}"></div></div>
+      <div class="facnote">${note}</div></div>`;
+  }
+  function renderStocks(){
+    const key=$("sort").value;
+    const arr=[...SD.stocks].sort((a,b)=> key==='sym' ? a.sym.localeCompare(b.sym) : b[key]-a[key]);
+    $("stocks").innerHTML = arr.map(s=>{
+      const up=s.dayChg>=0;
+      return `<div class="st" data-sym="${s.sym}">
+        <div class="top">
+          <div><div class="sym">${s.sym}</div><div class="name">${s.name||''}</div></div>
+          <div><div class="price">$${s.price.toLocaleString()}</div>
+            <div class="chg ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(s.dayChg).toFixed(2)}% today</div></div>
+        </div>
+        <div class="mid">
+          ${sparkline(s.spark)}
+          <div class="score" data-tip="Steady Score ${s.score}/100 — ${scoreBand(s.score).label}.\n\n${scoreBand(s.score).desc}\n\nThe full scale:\n• 85–100  Very steady\n• 70–84  Solid\n• 55–69  Mixed\n• 40–54  Shaky\n• below 40  Rough\n\nIt averages four factors — trend, momentum, stability, worst-drop — and is NOT a prediction the price will go up."><div class="n" style="color:${scoreColor(s.score)}">${s.score}</div><div class="l" style="color:${scoreColor(s.score)}">${scoreBand(s.score).label}</div></div>
+        </div>
+        <div class="detail">
+          ${facBar('Trend (above its long-run price?)',s.sTrend, s.vsAvg>=0?`Trading ${s.vsAvg}% above its 200-day average — generally rising.`:`Trading ${Math.abs(s.vsAvg)}% below its 200-day average — in a downtrend.`)}
+          ${facBar('Momentum (last 12 months)',s.sMom, `${s.ret1y>=0?'Up':'Down'} ${Math.abs(s.ret1y)}% over the past year.`)}
+          ${facBar('Stability (how calm the ride)',s.sStab, `Swings about ${s.vol}% a year. Lower is calmer; a broad fund is ~15%.`)}
+          ${facBar('Resilience (worst drop)',s.sDD, `Fell ${Math.abs(s.mdd)}% at its worst point this year. Could you hold through that?`)}
+          <div class="facnote" style="margin-top:10px"><b>Steady Score ${s.score}/100 — <span style="color:${scoreColor(s.score)}">${scoreBand(s.score).label}</span>.</b> ${scoreBand(s.score).desc}<br><br>It's the average of the four bars above — rewarding steadiness, not hype — and it is <b>not</b> a prediction the price will rise.</div>
+        </div>
+      </div>`;
+    }).join("");
+    document.querySelectorAll(".st").forEach(el=>el.onclick=()=>el.classList.toggle("open"));
+    $("stStamp").textContent = "Updated " + SD.updated;
+  }
+
+  /* ---------- FUNDS + PROJECTION ---------- */
+  function project(s,m0,y,r){const m=r/12,n=y*12;const a=s*Math.pow(1+m,n);const b=m===0?m0*n:m0*((Math.pow(1+m,n)-1)/m);return a+b;}
+  const series=(s,m,y,r)=>{const p=[];for(let i=0;i<=y;i++)p.push(project(s,m,i,r));return p;};
+  function renderFunds(){
+    $("funds").innerHTML = FUNDS.funds.map((f,i)=>`
+      <div class="fund ${i===selected?'on':''}" data-i="${i}">
+        <div class="nm">${f.name} <span style="color:var(--muted);font-weight:500;font-size:12px">${f.sym}</span></div>
+        <div class="ds">${f.desc}</div>
+        <div class="biglab">Last ${f.years} years</div>
+        <div class="big">${f.recent>0?'+':''}${f.recent}%/yr</div>
+        <div class="pills"><span class="pill" data-tip="The fund's yearly cost, as a % of the money you have in it. It's charged automatically — you never write a check. Lower is better; over decades even 1% adds up to a lot.">fee ${f.fee}%</span><span class="pill risk" data-tip="The biggest single-month drop this fund had over the period — a gut-check on how bumpy the ride gets.">worst month ${f.worst}%</span></div>
+      </div>`).join("");
+    document.querySelectorAll(".fund").forEach(el=>el.onclick=()=>{selected=+el.dataset.i;renderFunds();draw();});
+  }
+  function draw(){
+    const f=FUNDS.funds[selected]; if(!f)return;
+    const s=+$("start").value,m=+$("monthly").value,y=+$("years").value;
+    $("startV").textContent=money(s);$("monthlyV").textContent=money(m);
+    $("yearsV").textContent=y+(y===1?" year":" years");
+    $("projTitle").textContent=`See ${f.name} grow over time`;
+    const plan=f.plan/100, lo=Math.max(0,plan-.02), hi=plan+.02;
+    const put=s+m*12*y, mid=project(s,m,y,plan);
+    $("youPut").textContent=money(put);$("midOut").textContent=money(mid);$("growth").textContent=money(mid-put);
+    const loS=series(s,m,y,lo),midS=series(s,m,y,plan),hiS=series(s,m,y,hi),con=[];
+    for(let i=0;i<=y;i++)con.push(s+m*12*i);
+    const W=640,H=240,pad=6,top=10,bot=22,maxY=hiS[y]*1.05||1;
+    const X=i=>pad+i*(W-2*pad)/y,Y=v=>(H-bot)-v/maxY*(H-bot-top);
+    const P=a=>a.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ');
+    const band="M"+loS.map((v,i)=>X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' L')+" L"+hiS.slice().reverse().map((v,i)=>X(y-i).toFixed(1)+' '+Y(hiS[y-i]).toFixed(1)).join(' L')+" Z";
+    $("chart").innerHTML=`<path d="${band}" fill="var(--band)" opacity=".5"/><path d="${P(con)}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4"/><path d="${P(midS)}" fill="none" stroke="var(--accent)" stroke-width="3"/><text x="${pad}" y="${H-5}" fill="var(--muted)" font-size="11">today</text><text x="${W-pad}" y="${H-5}" fill="var(--muted)" font-size="11" text-anchor="end">${y} yr</text>`;
+    $("planbar").innerHTML=`We plan with a cautious <b>${f.plan}%/yr</b>. ${f.name} actually did <b>${f.recent}%/yr</b> over ${f.years} years — `+(f.recent>f.plan+1?`<span class="warn">an unusually strong stretch we don't count on repeating.</span>`:`in line with a cautious plan.`);
+    $("note").innerHTML=`Green line assumes ${f.plan}%/yr; shaded band shows ${Math.round(lo*100)}%–${Math.round(hi*100)}%. Fee <b>${f.fee}%/yr</b>, worst month <b>${f.worst}%</b>.`;
+  }
+
+  ["start","monthly","years"].forEach(id=>$(id).addEventListener("input",draw));
+  $("sort").addEventListener("change",renderStocks);
+  $("stampFunds").textContent=" Funds updated "+FUNDS.updated+".";
+  renderSignals(); renderStocks(); renderFunds(); draw();
+</script>
+</body>
+</html>
