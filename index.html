@@ -205,6 +205,16 @@
       <div><b>In market</b><span>The share of days a rule was actually invested, versus sitting safely in cash.</span></div>
       <div><b>Fee (expense ratio)</b><span>A fund's yearly cost as a % of your money, charged automatically. Lower is better; over decades it adds up.</span></div>
       <div><b>Compounding</b><span>Growth earning its own growth over time — the quiet engine behind long-term wealth.</span></div>
+      <div><b>Company fundamentals</b><span>Numbers about the underlying <i>business</i> — how profitable it is, how fast it's growing, how much it owes. They describe the company, not a prediction of the stock price.</span></div>
+      <div><b>P/E ratio</b><span>Price-to-earnings: the share price divided by yearly profit per share — roughly how many years of current profits you're paying for. Lower can mean cheaper; a very low P/E can also flag a troubled business.</span></div>
+      <div><b>Forward P/E</b><span>The same idea as P/E, but using analysts' forecast of next year's profits. A forward P/E lower than the normal one means profits are expected to grow.</span></div>
+      <div><b>Profit margin</b><span>What share of every sales dollar becomes actual profit. Higher usually means a more efficient, higher-quality business.</span></div>
+      <div><b>Revenue growth</b><span>How much yearly sales rose versus a year ago. Positive and steady is the healthy sign.</span></div>
+      <div><b>Return on equity (ROE)</b><span>Profit earned on the money shareholders have in the business. Higher is generally better — though very high can come from heavy borrowing.</span></div>
+      <div><b>Dividend yield</b><span>Yearly cash paid to shareholders as a % of the share price. 0% means the company reinvests everything instead of paying you cash.</span></div>
+      <div><b>Debt / equity</b><span>How much the company borrows versus its own capital. Higher means more debt and more risk if business slows. (Banks are left blank — the ratio doesn't mean the same for them.)</span></div>
+      <div><b>Market cap</b><span>The whole company's value — share price times every share. Bigger companies are usually steadier; smaller ones swing more.</span></div>
+      <div><b>Analyst consensus</b><span>The average buy/hold/sell call from Wall Street analysts. A rough sentiment gauge, not a guarantee — the crowd is often wrong.</span></div>
     </div>
   </div>
 
@@ -219,6 +229,7 @@
 <script src="stocks.js"></script>
 <script src="signals.js"></script>
 <script src="crypto.js"></script>
+<script src="fundamentals.js"></script>
 <script>
   const $ = id => document.getElementById(id);
   const money = n => "$" + Math.round(n).toLocaleString();
@@ -247,6 +258,8 @@
   const FUNDS = window.STEADY_DATA || {updated:"(never)", funds:[]};
   const SD = window.STEADY_STOCKS || {updated:"(never)", stocks:[]};
   const SG = window.STEADY_SIGNALS || {updated:"(never)", signals:[]};
+  const FUND = window.STEADY_FUND || {updated:"(never)", fundamentals:[]};
+  const FUNDMAP = {}; (FUND.fundamentals||[]).forEach(f=>FUNDMAP[f.sym]=f);
   let selected = 0;
 
   /* ---------- SIGNALS + BACKTEST ---------- */
@@ -376,6 +389,27 @@
     document.querySelectorAll("#crypto .st").forEach(el=>el.onclick=()=>el.classList.toggle("open"));
     $("cryptoStamp").textContent = "Updated " + C.updated;
   }
+  function fmtCap(b){ if(b==null) return '—'; return b>=1000 ? '$'+(b/1000).toFixed(2)+'T' : '$'+Math.round(b)+'B'; }
+  const recWord = {strong_buy:'Strong Buy', buy:'Buy', hold:'Hold', underperform:'Underperform', sell:'Sell', none:'—'};
+  function fundBlock(sym){
+    const f = FUNDMAP[sym]; if(!f) return '';
+    const v = (x,suf='') => (x==null ? '—' : x+suf);
+    const rec = recWord[f.rec] || (f.rec ? f.rec.replace(/_/g,' ') : '—');
+    return `<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+        <div style="font-weight:700;margin-bottom:8px">Company fundamentals <span style="color:var(--muted);font-weight:500;font-size:12px">the business behind the stock</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+          <div>${T('Price-to-earnings: the share price divided by yearly profit per share. Roughly how many years of current profits you pay for. Lower can mean cheaper, but a low P/E can also signal a troubled business.','P/E ratio')}: <b>${v(f.pe)}</b></div>
+          <div>${T('Like P/E, but using the forecast of profits one year ahead. A forward P/E lower than the normal P/E means profits are expected to grow.','Forward P/E')}: <b>${v(f.fwdPe)}</b></div>
+          <div>${T('Profit margin: what share of every sales dollar becomes actual profit. Higher means a more efficient, often higher-quality business.','Profit margin')}: <b>${v(f.margin,'%')}</b></div>
+          <div>${T('Revenue growth: how much yearly sales rose versus a year ago. Positive and steady is the healthy sign.','Revenue growth')}: <b>${v(f.revGrowth,'%')}</b></div>
+          <div>${T('Return on equity: profit earned on the money shareholders have in the business. Higher is generally better; very high can also come from heavy borrowing.','Return on equity')}: <b>${v(f.roe,'%')}</b></div>
+          <div>${T('Dividend yield: yearly cash paid to shareholders as a percent of the share price. 0% means the company reinvests everything instead of paying cash.','Dividend yield')}: <b>${v(f.divYield,'%')}</b></div>
+          <div>${T('Debt-to-equity: how much the company borrows versus its own capital. Higher means more debt and more risk if business slows. Banks show blank here because the ratio does not mean the same for them.','Debt / equity')}: <b>${v(f.debtEq)}</b></div>
+          <div>${T('Market value of the whole company: share price times all shares. Bigger companies are usually steadier; smaller ones swing more.','Company size')}: <b>${fmtCap(f.mktCap)}</b></div>
+        </div>
+        <div class="facnote" style="margin-top:8px">Wall Street consensus: <b>${rec}</b>. <span class="warn">Fundamentals describe the business, not the stock's future price — a great company can still be a poor investment at the wrong price.</span></div>
+      </div>`;
+  }
   function marketCard(s){
       const up=s.dayChg>=0;
       const pr=priceRead(s);
@@ -412,6 +446,7 @@
             </div>
             <div class="facnote" style="margin-top:8px">${dipNote(pr)} <span class="warn">A good price isn't a guarantee — cheap can get cheaper.</span></div>
           </div>
+          ${fundBlock(s.sym)}
         </div>
       </div>`;
   }

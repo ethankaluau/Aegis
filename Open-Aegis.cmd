@@ -8,6 +8,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-stocks.ps1"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-crypto.ps1"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-signals.ps1"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-data.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-fundamentals.ps1"
 echo.
 echo Opening Aegis...
 
