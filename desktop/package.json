@@ -1,0 +1,61 @@
+{
+  "name": "aegis",
+  "version": "1.0.0",
+  "description": "Aegis — honest investing dashboard, as a desktop app",
+  "author": "Ethan Kaluau",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "sync": "node sync-web.js",
+    "start": "node sync-web.js && electron .",
+    "dist": "node sync-web.js && electron-builder",
+    "publish": "node sync-web.js && electron-builder --publish always"
+  },
+  "build": {
+    "appId": "com.ethankaluau.aegis",
+    "productName": "Aegis",
+    "artifactName": "Aegis-Setup-${version}.${ext}",
+    "files": [
+      "main.js",
+      "preload.js",
+      "build/icon.ico"
+    ],
+    "extraResources": [
+      {
+        "from": "app",
+        "to": "app-payload"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Aegis"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ethankaluau",
+        "repo": "Aegis-releases",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "devDependencies": {
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
+    "png-to-ico": "^3.0.2"
+  }
+}
