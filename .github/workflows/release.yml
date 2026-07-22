@@ -56,8 +56,21 @@ jobs:
 
       - name: Build and publish
         working-directory: desktop
+        timeout-minutes: 30
         env:
           # Publishing to this same repo means the built-in token is enough —
           # no personal access token to create, store, or rotate.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish
+        # Uploading the ~100MB installer is the flaky part: the first run built
+        # fine, uploaded the small blockmap, then died on the installer itself.
+        # Retry rather than lose a whole build to one dropped connection.
+        run: |
+          for ($i = 1; $i -le 3; $i++) {
+            Write-Host "=== publish attempt $i of 3 ==="
+            npm run publish
+            if ($LASTEXITCODE -eq 0) { Write-Host "published on attempt $i"; exit 0 }
+            Write-Host "attempt $i failed (exit $LASTEXITCODE)"
+            if ($i -lt 3) { Start-Sleep -Seconds 20 }
+          }
+          Write-Host "all 3 attempts failed"
+          exit 1
