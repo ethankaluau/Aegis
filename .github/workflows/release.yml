@@ -17,6 +17,7 @@ on:
       - 'index.html'          # the app itself
       - 'refresh-*.ps1'       # how it fetches data
       - 'desktop/**'          # the shell, updater, packaging
+      - '.github/workflows/release.yml'   # how it's built
   workflow_dispatch:          # and manually, from the Actions tab
 
 permissions:
