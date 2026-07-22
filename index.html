@@ -169,6 +169,10 @@
       <label>Years invested: <span class="val" id="yearsV">25</span></label>
       <input type="range" id="years" min="1" max="45" step="1" value="25">
     </div>
+    <div class="field">
+      <label>Assumed return: <span class="val" id="rateV">7%/yr</span></label>
+      <input type="range" id="rate" min="1" max="15" step="0.5" value="7">
+    </div>
     <div class="out">
       <div class="stat" data-tip="The total of your own money — your starting amount plus every monthly contribution added up over the years. This is what you actually deposited."><div class="n" id="youPut">$0</div><div class="l">You put in</div></div>
       <div class="stat" data-tip="A cautious estimate of what it could grow to, using a conservative yearly return. Real results will bounce above and below this — it is not a guarantee."><div class="n" id="midOut">$0</div><div class="l">Likely value</div></div>
@@ -463,7 +467,7 @@
         <div class="big">${f.recent>0?'+':''}${f.recent}%/yr</div>
         <div class="pills"><span class="pill" data-tip="The fund's yearly cost, as a % of the money you have in it. It's charged automatically — you never write a check. Lower is better; over decades even 1% adds up to a lot.">fee ${f.fee}%</span><span class="pill risk" data-tip="The biggest single-month drop this fund had over the period — a gut-check on how bumpy the ride gets.">worst month ${f.worst}%</span></div>
       </div>`).join("");
-    document.querySelectorAll(".fund").forEach(el=>el.onclick=()=>{selected=+el.dataset.i;renderFunds();draw();});
+    document.querySelectorAll(".fund").forEach(el=>el.onclick=()=>{selected=+el.dataset.i;$("rate").value=FUNDS.funds[selected].plan;renderFunds();draw();});
   }
   function draw(){
     const f=FUNDS.funds[selected]; if(!f)return;
@@ -471,7 +475,10 @@
     $("startV").textContent=money(s);$("monthlyV").textContent=money(m);
     $("yearsV").textContent=y+(y===1?" year":" years");
     $("projTitle").textContent=`See ${f.name} grow over time`;
-    const plan=f.plan/100, lo=Math.max(0,plan-.02), hi=plan+.02;
+    // Return rate is now user-adjustable; selecting a fund resets it to that
+    // fund's cautious default (see fund-click handler in renderFunds).
+    const ratePct=+$("rate").value; $("rateV").textContent=ratePct+"%/yr";
+    const plan=ratePct/100, lo=Math.max(0,plan-.02), hi=plan+.02;
     const put=s+m*12*y, mid=project(s,m,y,plan);
     $("youPut").textContent=money(put);$("midOut").textContent=money(mid);$("growth").textContent=money(mid-put);
     const loS=series(s,m,y,lo),midS=series(s,m,y,plan),hiS=series(s,m,y,hi),con=[];
@@ -481,13 +488,14 @@
     const P=a=>a.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ');
     const band="M"+loS.map((v,i)=>X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' L')+" L"+hiS.slice().reverse().map((v,i)=>X(y-i).toFixed(1)+' '+Y(hiS[y-i]).toFixed(1)).join(' L')+" Z";
     $("chart").innerHTML=`<path d="${band}" fill="var(--band)" opacity=".5"/><path d="${P(con)}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4"/><path d="${P(midS)}" fill="none" stroke="var(--accent)" stroke-width="3"/><text x="${pad}" y="${H-5}" fill="var(--muted)" font-size="11">today</text><text x="${W-pad}" y="${H-5}" fill="var(--muted)" font-size="11" text-anchor="end">${y} yr</text>`;
-    $("planbar").innerHTML=`We plan with a cautious <b>${f.plan}%/yr</b>. ${f.name} actually did <b>${f.recent}%/yr</b> over ${f.years} years — `+(f.recent>f.plan+1?`<span class="warn">an unusually strong stretch we don't count on repeating.</span>`:`in line with a cautious plan.`);
-    $("note").innerHTML=`Green line assumes ${f.plan}%/yr; shaded band shows ${Math.round(lo*100)}%–${Math.round(hi*100)}%. Fee <b>${f.fee}%/yr</b>, worst month <b>${f.worst}%</b>.`;
+    $("planbar").innerHTML=`You're planning with <b>${ratePct}%/yr</b> (this fund's cautious default is ${f.plan}%/yr). ${f.name} actually did <b>${f.recent}%/yr</b> over ${f.years} years — `+(f.recent>ratePct+1?`<span class="warn">an unusually strong stretch we don't count on repeating.</span>`:`in line with your plan.`);
+    $("note").innerHTML=`Green line assumes ${ratePct}%/yr; shaded band shows ${Math.round(lo*100)}%–${Math.round(hi*100)}%. Fee <b>${f.fee}%/yr</b>, worst month <b>${f.worst}%</b>.`;
   }
 
-  ["start","monthly","years"].forEach(id=>$(id).addEventListener("input",draw));
+  ["start","monthly","years","rate"].forEach(id=>$(id).addEventListener("input",draw));
   $("sort").addEventListener("change",renderStocks);
   $("stampFunds").textContent=" Funds updated "+FUNDS.updated+".";
+  if(FUNDS.funds[selected]) $("rate").value=FUNDS.funds[selected].plan;
   renderSignals(); renderStocks(); renderCrypto(); renderFunds(); draw();
 </script>
 </body>
