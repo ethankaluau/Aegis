@@ -45,7 +45,7 @@
       {
         "provider": "github",
         "owner": "ethankaluau",
-        "repo": "Aegis-releases",
+        "repo": "Aegis",
         "releaseType": "release"
       }
     ]
