@@ -20,7 +20,8 @@ window.addEventListener('DOMContentLoaded', () => {
     #aegis-refresh-btn:hover{filter:brightness(1.07)}
     #aegis-refresh-btn:disabled{opacity:.55;cursor:default}
     #aegis-refresh-status{color:#9fb2c2;font-variant-numeric:tabular-nums}
-    @media (prefers-color-scheme: light){ #aegis-refresh-btn{color:#fff;background:#127a53} #aegis-refresh-status{color:#5a6b78} }
+    #aegis-refresh-status.stale{color:#ffb84d;font-weight:600}
+    @media (prefers-color-scheme: light){ #aegis-refresh-btn{color:#fff;background:#127a53} #aegis-refresh-status{color:#5a6b78} #aegis-refresh-status.stale{color:#a35a00} }
   `;
   document.head.appendChild(style);
   document.body.appendChild(bar);
@@ -33,11 +34,25 @@ window.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.invoke('aegis-refresh'); // main runs the scripts, then reloads the page
   });
 
+  // A refresh ends by reloading the page, which rebuilds this bar from scratch.
+  // So the outcome can't just be pushed at us — we have to ask for it on load,
+  // or a failed fetch would silently look identical to a successful one.
+  function showOutcome(r) {
+    if (!r || !r.failed.length) { stat.textContent = ''; stat.className = ''; return; }
+    stat.className = 'stale';
+    stat.textContent = `⚠ couldn't update ${r.failed.join(', ')} — showing older numbers`;
+    stat.title = 'These sections kept their last-good data. Check the section timestamps.';
+  }
+
+  ipcRenderer.invoke('aegis-last-refresh').then(showOutcome).catch(() => {});
+
   ipcRenderer.on('aegis-status', (_e, msg) => {
-    if (msg === 'done') {
-      stat.textContent = '';
+    if (msg === 'done' || msg === 'stale') {
       btn.disabled = false;
+      // The reload is about to fire; showOutcome runs again on the fresh page.
+      ipcRenderer.invoke('aegis-last-refresh').then(showOutcome).catch(() => {});
     } else {
+      stat.className = '';
       stat.textContent = msg;
       btn.disabled = true;
     }

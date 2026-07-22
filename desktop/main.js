@@ -24,16 +24,23 @@ const dataDir = path.join(app.getPath('userData'), 'data');
 const USER_FILES = new Set(['watchlist.txt', 'crypto-watchlist.txt']);
 const isUserData = f => USER_FILES.has(f) || f.endsWith('.js');
 
+// Run in order, each with the label shown to the user if it fails. Sequential on
+// purpose: several scripts hit the same price API, and firing all five at once
+// risks throttling — the full pass takes ~40s.
 const REFRESH_SCRIPTS = [
-  'refresh-stocks.ps1',
-  'refresh-crypto.ps1',
-  'refresh-signals.ps1',
-  'refresh-data.ps1',
-  'refresh-fundamentals.ps1',
+  { file: 'refresh-stocks.ps1', label: 'stocks' },
+  { file: 'refresh-crypto.ps1', label: 'crypto' },
+  { file: 'refresh-signals.ps1', label: 'signals' },
+  { file: 'refresh-data.ps1', label: 'funds' },
+  { file: 'refresh-fundamentals.ps1', label: 'fundamentals' },
 ];
 
 let win = null;
 let refreshing = false;
+// Outcome of the last pass. Survives the post-refresh reload so the page can ask
+// for it once the preload re-injects — otherwise the warning would be wiped by
+// the very reload that shows the new numbers.
+let lastRefresh = null;
 
 function seedDataDir() {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -67,13 +74,20 @@ async function refreshAll() {
   if (refreshing) return;
   refreshing = true;
   try {
+    const failed = [];
     let n = 0;
     for (const s of REFRESH_SCRIPTS) {
       n++;
       status(`Getting today's numbers… (${n}/${REFRESH_SCRIPTS.length})`);
-      await runScript(s);
+      const r = await runScript(s.file);
+      if (!r.ok) {
+        failed.push(s.label);
+        // Surface the reason in the console; the user gets the short version.
+        console.error(`refresh failed: ${s.file}`, (r.err && r.err.message) || '', r.stderr || '');
+      }
     }
-    status('done');
+    lastRefresh = { failed, at: Date.now() };
+    status(failed.length ? 'stale' : 'done');
     if (win && !win.isDestroyed()) win.webContents.reload();
   } finally {
     refreshing = false;
@@ -109,6 +123,9 @@ function createWindow() {
 }
 
 ipcMain.handle('aegis-refresh', async () => { await refreshAll(); });
+// Asked for by the preload after every page load, including the reload that ends
+// a refresh — this is how a failed fetch stays visible instead of being cleared.
+ipcMain.handle('aegis-last-refresh', () => lastRefresh);
 
 function checkForUpdates() {
   if (!app.isPackaged) return; // only the installed build can self-update
